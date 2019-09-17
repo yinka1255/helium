@@ -8,7 +8,7 @@
 	<meta name="description" content="Neon Admin Panel" />
 	<meta name="author" content="" />
 
-	<title>Neon - Admin Panel| Customers</title>
+	<title>Neon - Admin Panel| Transactions</title>
 	@include('admin.includes.head')
 
 </head>
@@ -28,57 +28,38 @@
 							<a href="{{url('admin/index')}}"><i class="fa-home"></i>Dashboard</a>
 						</li>
 						<li class="active">
-							<a href="#">Customers</a>
+							<a href="#">Transactions</a>
 						</li>
 					</ol>
 				</div>
 				<div class="col-xs-4">
-					<div class="pull-right">
-							
-					</div>
+					
 				</div>
 				<table class="table table-bordered datatable" id="table-1">
 					<thead>
 						<tr>
 							<th>S/N</th>
-							<th></th>
-							<th>Name</th>
-							<th>Email</th>
-							<th>Phone</th>
-							<th>Address</th>
-							<th>Status</th>
-							<th>Action</th>
+							<th>Bill</th>
+							<th>Student</th>
+							<th>Ward</th>
+							<th>Amount</th>
+							<th>Session</th>
+							<th>Reference No.</th>
+							<th>Date</th>
 						</tr>
 					</thead>
 					<tbody>
-						@foreach($customers as $key=>$customer)
+						@foreach($transactions as $key=>$transaction)
 						<tr class="odd gradeX">
 							<td>{{$key + 1}}</td>
-							<td><img width="50px" src="{{asset('public/images/profile.png')}}"></td>
-							<td>{{$customer->name}}</td>
-							<td>{{$customer->email}}</td>
-							<td>{{$customer->phone}}</td>
-							<td>{{$customer->address}}</td>
-							@if($customer->user_status == 1)
-							<td><span class="green">Active</span></td>
-							@elseif($customer->user_status == 2)
-							<td><span class="brown">Deactivated</span></td>
-							@endif
-							<td>
-								
-								@if($customer->user_status == 1)
-								<a href="{{url('admin/deactivate_customer/'.$customer->user_id)}}" class="btn btn-danger btn-sm btn-icon icon-left">
-									<i class="entypo-cancel"></i>
-									Deactivate
-								</a>
-								@elseif($customer->user_status == 2)
-								<a href="{{url('admin/activate_customer/'.$customer->user_id)}}" class="btn btn-success btn-sm btn-icon icon-left">
-									<i class="entypo-check"></i>
-									Activate
-								</a>
-								@endif
-								
-							</td>
+							<td>{{$transaction->bill_title}}</td>
+							<td>{{$transaction->student_name}}</td>
+							<td>{{$transaction->ward_name}}</td>
+							<td>N{{number_format($transaction->amount_paid)}}</td>
+							<td>{{$transaction->session_name}}</td>
+							<td>{{$transaction->transaction_reference}}</td>
+							<td>{{$transaction->created_at}}</td>
+							
 						</tr>
 						@endforeach
 					</tbody>

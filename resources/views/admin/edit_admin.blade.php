@@ -67,7 +67,7 @@
 					<div class="form-group">
 						<label for="field-2" class="col-sm-2 control-label">Password</label>
 						<div class="col-sm-5">
-							<input type="text" name="password" value="{{$admin->password}}" class="form-control" value="password" placeholder="Password" disabled>
+							<input type="text" name="password" class="form-control" value="password" placeholder="Password" disabled>
 						</div>
 					</div>
 					<div class="form-group">
@@ -80,6 +80,7 @@
 		</div>
 		<hr>
 		<br />
+		@if($permissions != null)
 		<div class="row">
 			<div class="col-md-12">
 			<h3><b>Permissions</b></h3><br/>
@@ -89,161 +90,229 @@
 				<div class="row">
 					<div class="col-md-3">
 						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="category_1" name="category_1" ></label>
-							<label>View categories</label>
+							<label class="cb-wrapper">
+								<input type="checkbox" @if($permissions->session_1 == "on") checked @endif id="session_1" name="session_1" >
+							</label>
+							<label>View sessions</label>
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="category_2" name="category_2" ></label>
-							<label>View, Add categories</label>
+							<label class="cb-wrapper"><input type="checkbox" @if($permissions->session_2 == "on") checked @endif id="session_2" name="session_2" ></label>
+							<label>View, Add sessions</label>
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="category_3" name="category_3" ></label>
-							<label>View, Add, Edit categories</label>
+							<label class="cb-wrapper"><input type="checkbox" @if($permissions->session_3 == "on") checked @endif id="session_3" name="session_3" ></label>
+							<label>View, Add, Edit sessions</label>
 						</div>
 					</div>
 				</div>
 				<div class="row">
 					<div class="col-md-3">
 						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="product_1" name="product_1" ></label>
-							<label>View products</label>
+							<label class="cb-wrapper"><input type="checkbox"  @if($permissions->student_1 == "on") checked @endif  id="student_1" name="student_1" ></label>
+							<label>View students</label>
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="product_2" name="product_2" ></label>
-							<label>View, Add products</label>
+							<label class="cb-wrapper"><input type="checkbox" @if($permissions->student_2 == "on") checked @endif  id="student_2" name="student_2" ></label>
+							<label>View, Add students</label>
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="product_3" name="product_3" ></label>
-							<label>View, Add, Edit products</label>
+							<label class="cb-wrapper"><input type="checkbox" @if($permissions->student_3 == "on") checked @endif  id="student_3" name="student_3" ></label>
+							<label>View, Add, Edit students</label>
 						</div>
 					</div>
 				</div>
 				<div class="row">
 					<div class="col-md-3">
 						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="inventory_1" name="inventory_1" ></label>
-							<label>View inventory</label>
+							<label class="cb-wrapper"><input type="checkbox" @if($permissions->bill_1 == "on") checked @endif  id="bill_1" name="bill_1" ></label>
+							<label>View bill</label>
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="inventory_2" name="inventory_2" ></label>
-							<label>View, Add inventory</label>
+							<label class="cb-wrapper"><input type="checkbox" @if($permissions->bill_2 == "on") checked @endif  id="bill_2" name="bill_2" ></label>
+							<label>View, Add bill</label>
 						</div>
 					</div>
+					{{--
 					<div class="col-md-3">
 						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="inventory_3" name="inventory_3" ></label>
-							<label>View, Add, Edit inventory</label>
+							<label class="cb-wrapper"><input type="checkbox" @if($permissions->bill_3 == "on") checked @endif  id="bill_3" name="bill_3" ></label>
+							<label>View, Add, Edit bill</label>
 						</div>
 					</div>
+					--}}
 				</div>
 				<div class="row">
 					<div class="col-md-3">
 						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="order_1" name="order_1" ></label>
-							<label>View order</label>
+							<label class="cb-wrapper"><input type="checkbox" @if($permissions->transaction_1 == "on") checked @endif  id="transaction_1" name="transaction_1" ></label>
+							<label>View transaction</label>
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="order_2" name="order_2" ></label>
-							<label>Manage status</label>
+							<label class="cb-wrapper"><input type="checkbox" @if($permissions->transaction_2 == "on") checked @endif id="transaction_2" name="transaction_2" ></label>
+							<label>Make manual payment</label>
 						</div>
 					</div>
-					<div class="col-md-3">
-						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="order_3" name="order_3" ></label>
-							<label>Manage order</label>
-						</div>
-					</div>
+					
 				</div>
 				<div class="row">
 					<div class="col-md-3">
 						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="order_1" name="order_1" ></label>
-							<label>View order</label>
+							<label class="cb-wrapper"><input type="checkbox" @if($permissions->admin_1 == "on") checked @endif id="admin_1" name="admin_1" ></label>
+							<label>View admin users</label>
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="order_2" name="order_2" ></label>
-							<label>Manage status</label>
+							<label class="cb-wrapper"><input type="checkbox" @if($permissions->admin_2 == "on") checked @endif id="admin_2" name="admin_2" ></label>
+							<label>Add admin users</label>
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="order_3" name="order_3" ></label>
-							<label>Manage order</label>
+							<label class="cb-wrapper"><input type="checkbox" @if($permissions->admin_3 == "on") checked @endif id="admin_3" name="admin_3" ></label>
+							<label>Manage admin users</label>
 						</div>
 					</div>
 				</div>
-				<div class="row">
-					<div class="col-md-3">
-						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="admin_1" name="admin_1" ></label>
-							<label>View admins</label>
-						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="admin_2" name="admin_2" ></label>
-							<label>View, Add admin</label>
-						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="admin_3" name="admin_3" ></label>
-							<label>View, Add, Edit admin</label>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-3">
-						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="customer_1" name="customer_1" ></label>
-							<label>View customers</label>
-						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="customer_2" name="customer_2" ></label>
-							<label>View, Add customer</label>
-						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="customer_3" name="customer_3" ></label>
-							<label>View, Add, Edit customer</label>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-3">
-						<div class="checkbox">
-							<label class="cb-wrapper"><input type="checkbox" id="report_1" name="report_1" ></label>
-							<label>View reports</label>
-						</div>
-					</div>
-				</div>
-				<div class="form-group">
-					<div class="col-sm-9 pull-right">
+				
+				<div class="form-group" style="margin-top: 20px;">
+					<div class="col-sm-12 pull-right">
 						<button type="submit" class="btn btn-default">Update user info</button>
 					</div>
 				</div>
 			</form>
 		<br /><br/><br/>
 		
-	</div>
-
+		</div>
+		@else
+		<div class="row">
+				<div class="col-md-12">
+				<h3><b>Permissions</b></h3><br/>
+				<form role="form" method="post" action="{{url('admin/save_permissions')}}" class="form-horizontal ">
+					{{ csrf_field() }}
+					<input type="hidden" name="id" value="{{$admin->id}}" />
+					<div class="row">
+						<div class="col-md-3">
+							<div class="checkbox">
+								<label class="cb-wrapper">
+									<input type="checkbox"  id="session_1" name="session_1" >
+								</label>
+								<label>View sessions</label>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="checkbox">
+								<label class="cb-wrapper"><input type="checkbox"  id="session_2" name="session_2" ></label>
+								<label>View, Add sessions</label>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="checkbox">
+								<label class="cb-wrapper"><input type="checkbox" id="session_3" name="session_3" ></label>
+								<label>View, Add, Edit sessions</label>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-3">
+							<div class="checkbox">
+								<label class="cb-wrapper"><input type="checkbox" id="student_1" name="student_1" ></label>
+								<label>View students</label>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="checkbox">
+								<label class="cb-wrapper"><input type="checkbox"  id="student_2" name="student_2" ></label>
+								<label>View, Add students</label>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="checkbox">
+								<label class="cb-wrapper"><input type="checkbox" id="student_3" name="student_3" ></label>
+								<label>View, Add, Edit students</label>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-3">
+							<div class="checkbox">
+								<label class="cb-wrapper"><input type="checkbox" id="bill_1" name="bill_1" ></label>
+								<label>View bill</label>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="checkbox">
+								<label class="cb-wrapper"><input type="checkbox" id="bill_2" name="bill_2" ></label>
+								<label>View, Add bill</label>
+							</div>
+						</div>
+						{{--
+						<div class="col-md-3">
+							<div class="checkbox">
+								<label class="cb-wrapper"><input type="checkbox" id="bill_3" name="bill_3" ></label>
+								<label>View, Add, Edit bill</label>
+							</div>
+						</div>
+						--}}
+					</div>
+					<div class="row">
+						<div class="col-md-3">
+							<div class="checkbox">
+								<label class="cb-wrapper"><input type="checkbox"  id="transaction_1" name="transaction_1" ></label>
+								<label>View transaction</label>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="checkbox">
+								<label class="cb-wrapper"><input type="checkbox" id="transaction_2" name="transaction_2" ></label>
+								<label>Make manual payment</label>
+							</div>
+						</div>
+						
+					</div>
+					<div class="row">
+						<div class="col-md-3">
+							<div class="checkbox">
+								<label class="cb-wrapper"><input type="checkbox" id="admin_1" name="admin_1" ></label>
+								<label>View admin users</label>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="checkbox">
+								<label class="cb-wrapper"><input type="checkbox" id="admin_2" name="admin_2" ></label>
+								<label>Add admin users</label>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="checkbox">
+								<label class="cb-wrapper"><input type="checkbox" id="admin_3" name="admin_3" ></label>
+								<label>Manage admin users</label>
+							</div>
+						</div>
+					</div>
+					
+					<div class="form-group" style="margin-top: 20px;">
+						<div class="col-sm-12 pull-right">
+							<button type="submit" class="btn btn-default">Update user info</button>
+						</div>
+					</div>
+				</form>
+			<br /><br/><br/>
+			
+			</div>
+		@endif
 
 
 

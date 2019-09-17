@@ -8,7 +8,7 @@
 	<meta name="description" content="Neon Admin Panel" />
 	<meta name="author" content="" />
 
-	<title>Neon | New Category</title>
+	<title>Neon | New Class</title>
 	@include('admin.includes.head')
 
 </head>
@@ -29,21 +29,21 @@
 								<a href="{{url('admin/index')}}"><i class="fa-home"></i>Dashboard</a>
 							</li>
 							<li>
-								<a href="{{url('admin/categories')}}">Categories</a>
+								<a href="{{url('admin/classes')}}">Classes</a>
 							</li>
 							<li class="active">
-								<a href="#">Category</a>
+								<a href="#">New Classes</a>
 							</li>
 						</ol>
 					</div>
 					<div class="col-xs-4">
 						<div class="pull-right">
-								
+								{{--<a href="{{url('admin/new_admin')}}" class="btn btn-primary"><i class="entypo-user"> </i> Add new</a>--}}
 						</div>
 					</div>
 				</div>
 				<br/><br/>
-				<form role="form" method="post" action="{{url('admin/save_category')}}" class="form-horizontal ">
+				<form role="form" method="post" action="{{url('admin/save_class')}}" class="form-horizontal ">
 					{{ csrf_field() }}
 					<div class="form-group">
 						<label for="field-2" class="col-sm-2 control-label">Name</label>
@@ -53,7 +53,7 @@
 					</div>
 					<div class="form-group">
 						<div class="col-sm-offset-2 col-sm-5">
-							<button type="submit" class="btn btn-default">Create category</button>
+							<button type="submit" class="btn btn-default">Create class</button>
 						</div>
 					</div>
 				</form>

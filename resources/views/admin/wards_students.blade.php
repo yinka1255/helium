@@ -8,7 +8,7 @@
 	<meta name="description" content="Neon Admin Panel" />
 	<meta name="author" content="" />
 
-	<title>Neon | Admin users</title>
+	<title>Neon - Admin Panel| Wards Students</title>
 	@include('admin.includes.head')
 
 </head>
@@ -22,63 +22,54 @@
 		
 		<div class="row">
 			<div class="col-xs-12">
-				<div class="col-xs-8">
-					<ol class="breadcrumb bc-3">
-						<li>
-							<a href="{{url('admin/index')}}"><i class="fa-home"></i>Dashboard</a>
-						</li>
-						<li class="active">
-							<a href="#">Admin users</a>
-						</li>
-					</ol>
-				</div>
-				<div class="col-xs-4">
-					<div class="pull-right">
-							<a href="{{url('admin/new_admin')}}" class="btn btn-primary"><i class="entypo-user"> </i> Add new</a>
+				<div class="row">
+					<div class="col-xs-8">
+						<ol class="breadcrumb bc-3">
+							<li>
+								<a href="{{url('admin/index')}}"><i class="fa-home"></i>Dashboard</a>
+							</li>
+							<li class="active">
+								<a href="#">{{$ward->name}}'s Wards</a>
+							</li>
+						</ol>
+					</div>
+					<div class="col-xs-4">
+						<div class="pull-right">
+							<a href="{{url('admin/new_student')}}" class="btn btn-primary"><i class="entypo-users"> </i> Add new</a>
+						</div>
 					</div>
 				</div>
+				<h3>{{$ward->name}}'s Wards</h3>
 				<table class="table table-bordered datatable" id="table-1">
 					<thead>
 						<tr>
 							<th>S/N</th>
-							<th></th>
-							<th>Name</th>
-							<th>Email</th>
-							<th>Phone</th>
-							<th>Status</th>
+							<th>Student</th>
+							<th>Student ID</th>
+							<th>Class</th>
 							<th>Action</th>
 						</tr>
 					</thead>
 					<tbody>
-						@foreach($admins as $key=>$admin)
+						@foreach($responses as $key=>$response)
 						<tr class="odd gradeX">
-							<td>{{$admin->key + 1}}</td>
-							<td><img src="{{asset('public/admin/images/profile.png')}}" class="avatar" /></td>
-							<td>{{$admin->name}}</td>
-							<td>{{$admin->email}}</td>
-							<td>{{$admin->phone}}</td>
-							@if($admin->status == 1)
-							<td><span class="green">Active</span></td>
-							@elseif($admin->status == 2)
-							<td><span class="brown">Deactivated</span></td>
-							@endif
+							<td>{{$key + 1}}</td>
+							<td>{{$response->name}}</td>
+							<td>{{$response->student_id}}</td>
+							<td>{{$response->class_name}}</td>
 							<td>
-								<a href="{{url('admin/edit_admin/'.$admin->id)}}" class="btn btn-default btn-sm btn-icon icon-left">
+								<a href="{{url('admin/manage_student_bills/'.$response->id)}}" class="btn btn-success btn-sm btn-icon icon-left">
+									<i class="entypo-credit-card"></i>
+									Manage Bills
+								</a>
+								<a href="{{url('admin/edit_student/'.$response->id)}}" class="btn btn-primary btn-sm btn-icon icon-left">
 									<i class="entypo-pencil"></i>
-									Manage
+									Edit
 								</a>
-								@if($admin->status == 1)
-								<a href="{{url('admin/deactivate_admin/'.$admin->id)}}" class="btn btn-danger btn-sm btn-icon icon-left">
+								<a href="{{url('admin/delete_student/'.$response->id)}}" class="btn btn-danger btn-sm btn-icon icon-left">
 									<i class="entypo-cancel"></i>
-									Deactivate
+									Delete
 								</a>
-								@elseif($admin->status == 2)
-								<a href="{{url('admin/activate_admin/'.$admin->id)}}" class="btn btn-success btn-sm btn-icon icon-left">
-									<i class="entypo-cancel"></i>
-									Activate
-								</a>
-								@endif
-								
 							</td>
 						</tr>
 						@endforeach

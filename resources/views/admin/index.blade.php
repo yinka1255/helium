@@ -27,8 +27,8 @@
 					<div class="icon"><i class="entypo-chart-bar"></i></div>
 					<div class="num" data-start="0" data-end="830" data-postfix="" data-duration="1500" data-delay="0">0</div>
 		
-					<h3>Orders this year</h3>
-					<p>Number of orders this year</p>
+					<h3>Transactions this month</h3>
+					<p>Number of transactions this month</p>
 				</div>
 		
 			</div>
@@ -39,8 +39,8 @@
 					<div class="icon"><i class="entypo-chart-bar"></i></div>
 					<div class="num" data-start="0" data-end="135" data-postfix="" data-duration="1500" data-delay="600">0</div>
 		
-					<h3>Orders this month</h3>
-					<p>Number of orders this month</p>
+					<h3>Transactions this year</h3>
+					<p>Number of transactions this year</p>
 				</div>
 		
 			</div>
@@ -53,8 +53,8 @@
 					<div class="icon"><i class="entypo-chart-bar"></i></div>
 					<div class="num" data-start="0" data-end="23" data-postfix="" data-duration="1500" data-delay="1200">0</div>
 		
-					<h3>Orders today</h3>
-					<p>Number of orders today</p>
+					<h3>Transactions this month</h3>
+					<p>Value of transactions this month</p>
 				</div>
 		
 			</div>
@@ -65,8 +65,8 @@
 					<div class="icon"><i class="entypo-chart-bar"></i></div>
 					<div class="num" data-start="0" data-end="52" data-postfix="" data-duration="1500" data-delay="1800">0</div>
 		
-					<h3>Average order</h3>
-					<p>Daily average of orders</p>
+					<h3>Transactions this year</h3>
+					<p>Value of transactions this year</p>
 				</div>
 		
 			</div>

@@ -7,16 +7,16 @@ use Illuminate\Support\Facades\Route;
 use Session;
 use Redirect;
 use App\User;
-use App\Permission;
-use App\Product;
-use App\Inventory;
-use App\Category;
-use App\Admin;
-use App\Vendor;
-use App\Customer;
 use App\State;
-use App\Order;
-use App\OrderDetail;
+use App\Student;
+use App\Bill;
+use App\Transaction;
+use App\BillDetail;
+use App\SchoolSession;
+use App\Term;
+use App\StudentWard;
+use App\Ward;
+use App\ClassRoom;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -25,390 +25,111 @@ use Cart;
 
 class CustomersController extends Controller{
 
-    public function index(){
-        $user = Auth::user();
-        $products = Product::join("inventories", "inventories.product_id", "=", "products.id")
-        ->select("products.*", "inventories.selling_price", "inventories.id as inventory_id")
-        ->orderByRaw('RAND()')->take(8)->get();
-        $categories = Category::leftjoin("products", "products.category_id", "=", "categories.id")
-        ->selectRaw('categories.*, count(products.category_id) as categoryCount')
-        ->groupBy('categories.id', 'categories.name')
-        ->where("categories.status", 1)->get();
-        if($user){
-            $loggedInUser = Customer::join("users", "customers.user_id", "=", "users.id")
-            ->where("customers.user_id", $user->id)
-            ->select("customers.*", "users.id as user_id", "users.status as user_status")->first();
+    public function getStudents($ward_id){
+        $student_wards = StudentWard::where("ward_id", $ward_id)->get();
+        foreach($student_wards as $key=>$student_ward){
+            $students[$key] = Student::join("class_rooms", "class_rooms.id", "=", "students.class_id")
+                                ->select("students.*", "class_rooms.name as class_name")
+                                ->where("students.id", $student_ward->student_id)->first();
+            $student_bill = Bill::where(["type"=>2, "type_id"=> $student_ward->student_id])->sum("amount");
+            $students_class_bill = Bill::join("bill_details", "bills.id", "=", "bill_details.bill_id")
+                                    ->selectRaw("sum(bills.amount) as total")
+                                    ->where(["bill_details.student_id"=> $student_ward->student_id])->first();
+            //Bill::where(["type"=>1, "type_id"=> $students[$key]->class_id])->sum("amount");
 
-            return view('/index')->with(["loggedInUser"=>$loggedInUser, "products"=>$products, "categories"=>$categories]);
-        }else{
-            return view('/index')->with(["products"=>$products, "categories"=>$categories]);
+            $paid = Transaction::where(["student_id"=> $students[$key]->id])
+                            ->orWhere(function ($q) use ($students, $key) {
+                                $q->where('student_id', $students[$key]->id);
+                            })->sum('amount_paid');
+            $students[$key]['bills_total'] = $student_bill + $students_class_bill->total;
+            $students[$key]['paid'] = $paid;
         }
+        return response()->json(['success' => $students]);
+        
     }
 
-    public function productDetails($product_id){
-        $user = Auth::user();
-        $product = Product::join("inventories", "inventories.product_id", "=", "products.id")
-        ->select("products.*", "inventories.selling_price", "inventories.id as inventory_id")
-        ->where("products.id", $product_id)->first();
-        $categories = Category::leftjoin("products", "products.category_id", "=", "categories.id")
-        ->selectRaw('categories.*, count(products.category_id) as categoryCount')
-        ->groupBy('categories.id', 'categories.name')
-        ->where("categories.status", 1)->get();
-        $products = Product::join("inventories", "inventories.product_id", "=", "products.id")
-        ->select("products.*", "inventories.selling_price", "inventories.id as inventory_id")
-        ->where("products.category_id", $product->category_id)
-        ->orderByRaw('RAND()')->take(8)->get();
-        if($user){
-            $loggedInUser = Customer::join("users", "customers.user_id", "=", "users.id")
-            ->where("customers.user_id", $user->id)
-            ->select("customers.*", "users.id as user_id", "users.status as user_status")->first();
-
-            return view('/product_details')->with(["loggedInUser"=>$loggedInUser, "product"=>$product, "categories"=>$categories, "products"=>$products]);
-        }else{
-            return view('/product_details')->with(["product"=>$product, "categories"=>$categories, "products"=>$products]);
+    public function getBillsTotal($ward_id){
+        $student_wards = StudentWard::where("ward_id", $ward_id)->get();
+        $bills = 0;
+        foreach($student_wards as $key=>$student_ward){
+            $student_id = $student_ward->student_id;
+            $student = Student::where("id", $student_id)->first();
+            $student_bill = Bill::where(["type"=>2, "type_id"=> $student_ward->student_id])->sum("amount");
+            $students_class_bill = Bill::join("bill_details", "bills.id", "=", "bill_details.bill_id")
+                                    ->selectRaw("sum(bills.amount) as total")
+                                    ->where(["bill_details.student_id"=> $student->id])->first();
+            $transactions = Transaction::where("student_id", $student->id)->sum("amount_paid");
+            $bills += $student_bill + $students_class_bill->total - $transactions;
         }
+        return response()->json(['success' => $bills]);
+        
     }
 
-    public function profile(){
-        $user = Auth::user();
-        $categories = Category::leftjoin("products", "products.category_id", "=", "categories.id")
-        ->selectRaw('categories.*, count(products.category_id) as categoryCount')
-        ->groupBy('categories.id', 'categories.name')
-        ->where("categories.status", 1)->get();
-        if(!$user || $user->type != 3){
-            Session::flash('error', 'Sorry! You do not have access to this page');
-            return redirect('/login');
+    public function getStudentBills($student_id){
+        $student = Student::where("id", $student_id)->first();
+        $transactions = Transaction::where("student_id", $student->id)->sum("amount_paid");
+        $student_bill = Bill::where(["type"=>2, "type_id"=> $student_id])->sum("amount");
+        //$students_class_bill = Bill::where(["type"=>1, "type_id"=> $student->class_id])->sum("amount");
+        $students_class_bill = Bill::join("bill_details", "bills.id", "=", "bill_details.bill_id")
+        ->selectRaw("sum(bills.amount) as total")
+        ->where(["bill_details.student_id"=> $student->id])->first();
+
+        $bills = $student_bill + $students_class_bill->total - $transactions;
+
+        $student_bills =  Bill::join("school_sessions", "bills.session_id", "=", "school_sessions.id")
+        ->select("bills.*", "school_sessions.name as session_name")
+        ->where(["type"=>2, "type_id"=> $student_id])->get();
+        $student_class_bills = Bill::join("bill_details", "bills.id", "=", "bill_details.bill_id")
+        ->join("school_sessions", "bills.session_id", "=", "school_sessions.id")
+        ->selectRaw("bills.*, bill_details.id as bill_details_id, school_sessions.name as session_name")
+        ->where(["bill_details.student_id"=> $student->id])->get();
+        
+        if(count($student_bills) <1  && count($student_class_bills) >0){
+            $all_student_bills = $student_class_bills;
+        }elseif(count($student_bills) >0  && count($student_class_bills) <1){
+            $all_student_bills = $student_bills;
+        }elseif(count($student_bills) <1  && count($student_class_bills) <1){
+            $all_student_bills = [];
+        }elseif(count($student_bills) >0  && count($student_class_bills) >0){
+            $all_student_bills = array_merge($student_bills, $student_class_bills);
         }
-        $loggedInUser = Customer::join("users", "customers.user_id", "=", "users.id")
-                        ->where("customers.user_id", $user->id)
-                        ->select("customers.*", "users.id as user_id", "users.status as user_status")->first();
+        return response()->json(["all_student_bills"=>$all_student_bills,  'bills_total' => $bills]);
+    }
 
-        return view('profile')->with(["loggedInUser"=>$loggedInUser, "categories"=>$categories]);
-    } 
+    public function getAllStudentsBills($guardian_id){
+        $all_students_bills = [];
+        $bills = $this->getBillsTotal($guardian_id);
 
-    public function updatePassword(Request $request){
+            $transactions = Transaction::join("bills", "bills.id", "=", "transactions.bill_id")
+            ->join("school_sessions", "school_sessions.id", "=", "bills.session_id")
+            ->join("students", "students.id", "=", "transactions.student_id")
+            ->select("transactions.*", "bills.title", "bills.amount", "bills.term", "bills.type", "bills.type_id", "school_sessions.name as session_name", "students.name as student_name","students.id as student_id") 
+            ->where("transactions.ward_id1", $guardian_id)->get();
+        return response()->json(["transactions"=>$transactions,  'bills_total' => $bills]);
+    }
 
-        if($request->input("password") != $request->input("cpassword")){
-            Session::flash('error', 'Sorry!, The two passwords provided must matchy');
-            return back();
+    public function getBillDetails($type, $type_id, $student_id){
+        if($type == 1){
+            $bill_details = Bill::join("school_sessions", "bills.session_id", "=", "school_sessions.id")
+            ->select("bills.*", "school_sessions.name as session_name")
+            ->where("type_id", $type_id)->first();
+        }elseif($type == 2){
+            $bill_details = BillDetails::join("bills", "bills.id", "=", "bill_details.bill_id")
+            ->join("school_sessions", "bills.session_id", "=", "school_sessions.id")
+            ->select("bills.*", "school_sessions.name as session_name")
+            ->select("bills.*", "bill_details.id as bill_details_id")
+            ->where("id", $type_id)->first();
         }
-        $user = Auth::user();
-        $user = User::where("username", $user->username)->first();
-        $user->password = bcrypt($request->input("password"));
-        $user->save();
-        Session::flash('success1', 'Congrats, your password has been updated successfully');
-        return back();
-    }
-    
-    public function updateProfile(Request $request){
-        $user = Auth::user();
-        if(!$user || $user->type != 3){
-            Session::flash('error', 'Sorry! You do not have access to this page');
-            return redirect('/login');
-        }
-        $customer = Customer::where("customers.user_id", $user->id)->first();
-        $customer->name = $request->input("name");
-        $customer->phone = $request->input("phone");
-        $customer->email = $request->input("email");
-        $user = User::where("id", $user->id)->first();
-        $user->email = $request->input("email");
-        if($customer->save()){
-            $user->save();
-            Session::flash('success1', "Profile updated succeessfully");
-            return back();
-        }else{
-            Session::flash('error', 'An error occured while trying to update profile.');
-            return back();
-        }    
-    }  
-
-    public function products(){
-        $user = Auth::user();
-        $products = Product::join("inventories", "inventories.product_id", "=", "products.id")
-        ->select("products.*", "inventories.selling_price", "inventories.id as inventory_id")
-        ->paginate(30);
-        $categories = Category::leftjoin("products", "products.category_id", "=", "categories.id")
-        ->selectRaw('categories.*, count(products.category_id) as categoryCount')
-        ->groupBy('categories.id', 'categories.name')
-        ->where("categories.status", 1)->get();
-        if($user){
-            $loggedInUser = Customer::join("users", "customers.user_id", "=", "users.id")
-            ->where("customers.user_id", $user->id)
-            ->select("customers.*", "users.id as user_id", "users.status as user_status")->first();
-
-            return view('/products')->with(["loggedInUser"=>$loggedInUser, "categories"=>$categories, "products"=>$products]);
-        }else{
-            return view('/products')->with(["categories"=>$categories, "products"=>$products]);
-        }
+        $transactions = Transaction::where(["bill_id"=>$type_id, "student_id"=>$student_id])->get();
+        return response()->json(["success"=>$bill_details, "transactions"=>$transactions]);
     }
 
-    public function completeOrder(Request $request){
-        $user = Auth::user();
-        $loggedInUser = Customer::join("users", "customers.user_id", "=", "users.id")
-            ->where("customers.user_id", $user->id)
-            ->select("customers.*", "users.id as user_id", "users.status as user_status")->first();
-        $order = new Order;
-        $order->contact_person = $request->input('contact_person');
-        $order->customer_id = $loggedInUser->id;
-        $order->phone = $request->input('phone');
-        $order->address = $request->input('address');
-        $order->state = $request->input('state');
-        $order->status = 1;
-        if($order->save()){
-            foreach(Cart::content() as $cart){
-                $order_details = new OrderDetail;
-                $order_details->order_id = $order->id;
-                $order_details->product_id = $cart->id;
-                $order_details->selling_price = $cart->price;
-                $order_details->qty = $cart->qty;
-                $order_details->status = 1;
-                $order_details->save();
-            }
-            $order = Order::leftjoin("order_details", "orders.id", "=", "order_details.order_id")
-            ->join("products", "products.id", "=", "order_details.product_id")
-            ->join("customers", "customers.id", "=", "orders.customer_id")
-            ->select("orders.*",  "order_details.selling_price", "order_details.qty", "products.name", "customers.name as customer_name", "customers.phone as customer_phone", "customers.email as customer_email")
-            ->where("orders.id", $order->id)
-            ->get();
-            Cart::destroy();
-            $this->mailReceipt($order);
-            Session::flash('success2', 'Order completed succssfully... Our delivery team will contact you shortly');
-            return redirect('/');
-        }else{
-            Session::flash('error', 'An error occured while processing your order');
-            return back();
-        }
+    public function getStudent($student_id){
+        $student = Student::where("id", $student_id)->first();
+        
+        return response()->json(['success' => $student]);
+        
     }
 
-    public function mailReceipt($order){
-        $data = [
-            'email'=> $order[0]->customer_email,
-            'order'=> $order,
-            'date'=>date('Y-m-d')
-        ];
-        Mail::send('receipt_mail', $data, function($message) use($data){
-            $message->from('info@cashluck.com.ng', 'Neon');
-            $message->SMTPDebug = 4; 
-            $message->to($data['email']);
-            $message->subject('Neon purchase receipt');
-        });
-    }
-
-    public function receipt(){
-        $order = Order::leftjoin("order_details", "orders.id", "=", "order_details.order_id")
-            ->join("products", "products.id", "=", "order_details.product_id")
-            ->join("customers", "customers.id", "=", "orders.customer_id")
-            ->select("orders.*",  "order_details.selling_price", "order_details.qty", "products.name", "customers.name as customer_name", "customers.phone as customer_phone")
-            ->where("orders.id", 1)
-            ->get();
-        return view("receipt_mail")->with(["order"=>$order]);
-    }
-
-
-    public function searchProduct(Request $request){
-        $user = Auth::user();
-        $search = $request->input('product');
-        $products = Product::join("inventories", "inventories.product_id", "=", "products.id")
-        ->select("products.*", "inventories.selling_price", "inventories.id as inventory_id")
-        ->where("products.name", 'LIKE', '%' . $search . '%')
-        ->paginate(30);
-        $categories = Category::leftjoin("products", "products.category_id", "=", "categories.id")
-        ->selectRaw('categories.*, count(products.category_id) as categoryCount')
-        ->groupBy('categories.id', 'categories.name')
-        ->where("categories.status", 1)->get();
-        if($user){
-            $loggedInUser = Customer::join("users", "customers.user_id", "=", "users.id")
-            ->where("customers.user_id", $user->id)
-            ->select("customers.*", "users.id as user_id", "users.status as user_status")->first();
-
-            return view('/products')->with(["loggedInUser"=>$loggedInUser, "categories"=>$categories, "products"=>$products]);
-        }else{
-            return view('/products')->with(["categories"=>$categories, "products"=>$products]);
-        }
-    }
-
-    public function categoryProducts($category_id){
-        $user = Auth::user();
-        $products = Product::join("inventories", "inventories.product_id", "=", "products.id")
-        ->select("products.*", "inventories.selling_price", "inventories.id as inventory_id")
-        ->where("products.category_id", $category_id)
-        ->paginate(30);
-        $categories = Category::leftjoin("products", "products.category_id", "=", "categories.id")
-        ->selectRaw('categories.*, count(products.category_id) as categoryCount')
-        ->groupBy('categories.id', 'categories.name')
-        ->where("categories.status", 1)->get();
-        if($user){
-            $loggedInUser = Customer::join("users", "customers.user_id", "=", "users.id")
-            ->where("customers.user_id", $user->id)
-            ->select("customers.*", "users.id as user_id", "users.status as user_status")->first();
-
-            return view('/products')->with(["loggedInUser"=>$loggedInUser, "categories"=>$categories, "products"=>$products]);
-        }else{
-            return view('/products')->with(["categories"=>$categories, "products"=>$products]);
-        }
-    }
-
-    public function cartAdd($product_id){
-        $product = Product::join("inventories", "inventories.product_id", "=", "products.id")
-        ->select("products.*", "inventories.selling_price", "inventories.id as inventory_id")
-        ->where("products.id", $product_id)->first();
-        Cart::add($product->id, $product->name, 1, $product->selling_price, ['image' => $product->image]);
-        Session::flash('success', $product->name.' added to cart');
-        return back();
-    }
-    public function removeCart($rowId){
-        Cart::remove($rowId);
-        Session::flash('success1', 'Item removed from cart');
-        return back();
-    }
-
-    public function updateCart(Request $request){
-        Cart::update($request->input('rowId'), $request->input('qty')+1);
-        return back();
-    }
-
-    public function cart(){
-        $user = Auth::user();
-        $categories = Category::leftjoin("products", "products.category_id", "=", "categories.id")
-        ->selectRaw('categories.*, count(products.category_id) as categoryCount')
-        ->groupBy('categories.id', 'categories.name')
-        ->where("categories.status", 1)->get();
-        if($user){
-            $loggedInUser = Customer::join("users", "customers.user_id", "=", "users.id")
-            ->where("customers.user_id", $user->id)
-            ->select("customers.*", "users.id as user_id", "users.status as user_status")->first();
-            return view('cart')->with(["loggedInUser"=>$loggedInUser, "categories"=>$categories]);
-        }else{
-            return view('cart')->with(["categories"=>$categories]);
-        }
-    }
-
-    public function checkout(){
-        $user = Auth::user();
-        $categories = Category::leftjoin("products", "products.category_id", "=", "categories.id")
-        ->selectRaw('categories.*, count(products.category_id) as categoryCount')
-        ->groupBy('categories.id', 'categories.name')
-        ->where("categories.status", 1)->get();
-        if($user){
-            $loggedInUser = Customer::join("users", "customers.user_id", "=", "users.id")
-            ->where("customers.user_id", $user->id)
-            ->select("customers.*", "users.id as user_id", "users.status as user_status")->first();
-            return view('checkout')->with(["loggedInUser"=>$loggedInUser, "categories"=>$categories]);
-        }else{
-        return view('checkout')->with(["categories"=>$categories]);
-        }
-    }
-
-    public function about(){
-        $user = Auth::user();
-        $categories = Category::leftjoin("products", "products.category_id", "=", "categories.id")
-        ->selectRaw('categories.*, count(products.category_id) as categoryCount')
-        ->groupBy('categories.id', 'categories.name')
-        ->where("categories.status", 1)->get();
-        if($user){
-            $loggedInUser = Customer::join("users", "customers.user_id", "=", "users.id")
-                        ->where("customers.user_id", $user->id)
-                        ->select("customers.*", "users.id as user_id", "users.status as user_status")->first();
-             return view('/about')->with(["loggedInUser"=>$loggedInUser, "categories"=>$categories]);
-        }else{
-            return view('/about')->with(["categories"=>$categories]);
-        }
-    }
-
-    public function faqs(){
-        $user = Auth::user();
-        $categories = Category::leftjoin("products", "products.category_id", "=", "categories.id")
-        ->selectRaw('categories.*, count(products.category_id) as categoryCount')
-        ->groupBy('categories.id', 'categories.name')
-        ->where("categories.status", 1)->get();
-        if($user){
-            $loggedInUser = Customer::join("users", "customers.user_id", "=", "users.id")
-                        ->where("customers.user_id", $user->id)
-                        ->select("customers.*", "users.id as user_id", "users.status as user_status")->first();
-             return view('/faqs')->with(["loggedInUser"=>$loggedInUser, "categories"=>$categories]);
-        }else{
-            return view('/faqs')->with(["categories"=>$categories]);
-        }
-    }
-    public function terms(){
-        $user = Auth::user();
-        $categories = Category::leftjoin("products", "products.category_id", "=", "categories.id")
-        ->selectRaw('categories.*, count(products.category_id) as categoryCount')
-        ->groupBy('categories.id', 'categories.name')
-        ->where("categories.status", 1)->get();
-        if($user){
-            $loggedInUser = Customer::join("users", "customers.user_id", "=", "users.id")
-                        ->where("customers.user_id", $user->id)
-                        ->select("customers.*", "users.id as user_id", "users.status as user_status")->first();
-             return view('/terms')->with(["loggedInUser"=>$loggedInUser, "categories"=>$categories]);
-        }else{
-            return view('/terms')->with(["categories"=>$categories]);
-        }
-    }
-    public function policy(){
-        $user = Auth::user();
-        $categories = Category::leftjoin("products", "products.category_id", "=", "categories.id")
-        ->selectRaw('categories.*, count(products.category_id) as categoryCount')
-        ->groupBy('categories.id', 'categories.name')
-        ->where("categories.status", 1)->get();
-        if($user){
-            $loggedInUser = Customer::join("users", "customers.user_id", "=", "users.id")
-                        ->where("customers.user_id", $user->id)
-                        ->select("customers.*", "users.id as user_id", "users.status as user_status")->first();
-             return view('/policy')->with(["loggedInUser"=>$loggedInUser, "categories"=>$categories]);
-        }else{
-            return view('/policy')->with(["categories"=>$categories]);
-        }
-    }
-    public function contact(){
-        $user = Auth::user();
-        $categories = Category::leftjoin("products", "products.category_id", "=", "categories.id")
-        ->selectRaw('categories.*, count(products.category_id) as categoryCount')
-        ->groupBy('categories.id', 'categories.name')
-        ->where("categories.status", 1)->get();
-        if($user){
-            $loggedInUser = Customer::join("users", "customers.user_id", "=", "users.id")
-                        ->where("customers.user_id", $user->id)
-                        ->select("customers.*", "users.id as user_id", "users.status as user_status")->first();
-             return view('/contact')->with(["loggedInUser"=>$loggedInUser, "categories"=>$categories]);
-        }else{
-            return view('/contact')->with(["categories"=>$categories]);
-        }
-    }
-
-    public function customerRegister(Request $request){
-        $check = User::where("email", $request->input("email"))->first();
-        if($check != null){
-            Session::flash('error', 'Sorry! An account with the provided email already exist');
-            return back();
-        }
-        $user = new User;
-        $user->email = $request->input("email");
-        $password = $request->input("password");
-        $user->password = bcrypt($password);
-        $user->type = 3;
-        $user->status = 1;
-        if($user->save()){
-            $customer = new Customer;
-            $customer->user_id = $user->id;
-            $customer->name = $request->input("name");
-            $customer->phone = $request->input("phone");
-            $customer->email = $request->input("email");
-            $customer->status = 1;
-            
-            if($customer->save()){
-                Auth::loginUsingId($user->id);
-                //$this->adminMail($request->input("email"), $request->input("name"), $password);
-                Session::flash('success', 'Congrats, your account has been created successfully');
-                return back();
-            }else{
-                Session::flash('error', 'Sorry! An error occured while trying to create account');
-                return back();
-            }    
-        }else{
-            Session::flash('error', 'Sorry! An error occured while trying to create account');
-                return back();
-        }    
-    }  
-
+   
 }

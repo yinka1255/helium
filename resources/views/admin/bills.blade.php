@@ -8,7 +8,7 @@
 	<meta name="description" content="Neon Admin Panel" />
 	<meta name="author" content="" />
 
-	<title>Neon | Admin users</title>
+	<title>Neon - Admin Panel| Bills</title>
 	@include('admin.includes.head')
 
 </head>
@@ -22,63 +22,70 @@
 		
 		<div class="row">
 			<div class="col-xs-12">
-				<div class="col-xs-8">
-					<ol class="breadcrumb bc-3">
-						<li>
-							<a href="{{url('admin/index')}}"><i class="fa-home"></i>Dashboard</a>
-						</li>
-						<li class="active">
-							<a href="#">Admin users</a>
-						</li>
-					</ol>
-				</div>
-				<div class="col-xs-4">
-					<div class="pull-right">
-							<a href="{{url('admin/new_admin')}}" class="btn btn-primary"><i class="entypo-user"> </i> Add new</a>
+				<div class="row">
+					<div class="col-xs-8">
+						<ol class="breadcrumb bc-3">
+							<li>
+								<a href="{{url('admin/index')}}"><i class="fa-home"></i>Dashboard</a>
+							</li>
+							
+							<li class="active">
+								<a href="#">Bills</a>
+							</li>
+						</ol>
+					</div>
+					<div class="col-xs-4">
+						<div class="pull-right">
+							{{--<a href="{{url('admin/new_bill')}}" class="btn btn-primary"><i class="entypo-book"> </i> Add new</a>--}}
+						</div>
 					</div>
 				</div>
+				<h3>All Bills</h3>
 				<table class="table table-bordered datatable" id="table-1">
 					<thead>
 						<tr>
 							<th>S/N</th>
-							<th></th>
+							<th>Title</th>
+							<th>Type</th>
 							<th>Name</th>
-							<th>Email</th>
-							<th>Phone</th>
-							<th>Status</th>
+							<th>Session</th>
+							<th>Term</th>
+							<th>Amount</th>
+							<th>Due date</th>
 							<th>Action</th>
 						</tr>
 					</thead>
 					<tbody>
-						@foreach($admins as $key=>$admin)
+						@foreach($bills as $key=>$bill)
 						<tr class="odd gradeX">
-							<td>{{$admin->key + 1}}</td>
-							<td><img src="{{asset('public/admin/images/profile.png')}}" class="avatar" /></td>
-							<td>{{$admin->name}}</td>
-							<td>{{$admin->email}}</td>
-							<td>{{$admin->phone}}</td>
-							@if($admin->status == 1)
-							<td><span class="green">Active</span></td>
-							@elseif($admin->status == 2)
-							<td><span class="brown">Deactivated</span></td>
+							<td>{{$key + 1}}</td>
+							<td>{{$bill->title}}</td>
+							@if($bill->type == 1)
+							<td>Class</td>
+							@elseif($bill->type == 2)
+							<td>Student</td>
 							@endif
+							<td>{{$bill->class_name}}</td>
+							<td>{{$bill->session_name}}</td>
+							<td>{{$bill->term}}</td>
+							<td>{{$bill->amount}}</td>
+							<td>{{$bill->due_date}}</td>
 							<td>
-								<a href="{{url('admin/edit_admin/'.$admin->id)}}" class="btn btn-default btn-sm btn-icon icon-left">
-									<i class="entypo-pencil"></i>
+								@if($bill->type == 1)
+								<a href="{{url('admin/bill_class_details/'.$bill->type_id.'/'.$bill->id)}}" class="btn btn-success btn-sm btn-icon icon-left">
+									<i class="entypo-users"></i>
 									Manage
 								</a>
-								@if($admin->status == 1)
-								<a href="{{url('admin/deactivate_admin/'.$admin->id)}}" class="btn btn-danger btn-sm btn-icon icon-left">
-									<i class="entypo-cancel"></i>
-									Deactivate
-								</a>
-								@elseif($admin->status == 2)
-								<a href="{{url('admin/activate_admin/'.$admin->id)}}" class="btn btn-success btn-sm btn-icon icon-left">
-									<i class="entypo-cancel"></i>
-									Activate
+								@elseif($bill->type == 2)
+								<a href="{{url('admin/manage_student_bill/'.$bill->id)}}" class="btn btn-success btn-sm btn-icon icon-left">
+									<i class="entypo-users"></i>
+									Manage
 								</a>
 								@endif
-								
+								<a href="{{url('admin/delete_bill/'.$bill->id)}}" class="btn btn-danger btn-sm btn-icon icon-left">
+									<i class="entypo-cancel"></i>
+									Delete
+								</a>
 							</td>
 						</tr>
 						@endforeach

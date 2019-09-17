@@ -38,28 +38,40 @@
                     <span class="title">Dashboard </span>
                 </a>
             </li>
-            <li @if(Request::segment(2) == "categories") class="active" @endif>
-                <a href="{{url('admin/categories')}}">
-                    <i class="entypo-floppy"></i>
-                    <span class="title">Categories </span>
+            <li @if(Request::segment(2) == "sessions") class="active" @endif>
+                <a href="{{url('admin/sessions')}}">
+                    <i class="entypo-calendar"></i>
+                    <span class="title">Sessions </span>
                 </a>
             </li>
-            <li @if(Request::segment(2) == "products") class="active" @endif>
-                <a href="{{url('admin/products')}}">
-                    <i class="entypo-tag"></i>
-                    <span class="title">Products </span>
+            <li @if(Request::segment(2) == "classes") class="active" @endif>
+                <a href="{{url('admin/classes')}}">
+                    <i class="entypo-book"></i>
+                    <span class="title">Classes </span>
                 </a>
             </li>
-            <li @if(Request::segment(2) == "inventories") class="active" @endif>
-                <a href="{{url('admin/inventories')}}">
-                    <i class="entypo-record"></i>
-                    <span class="title">Inventory </span>
+            <li @if(Request::segment(2) == "students") class="active" @endif>
+                <a href="{{url('admin/students')}}">
+                    <i class="entypo-users"></i>
+                    <span class="title">Students </span>
                 </a>
             </li>
-            <li @if(Request::segment(2) == "orders") class="active" @endif>
-                <a href="{{url('admin/orders')}}">
+            <li @if(Request::segment(2) == "wards") class="active" @endif>
+                <a href="{{url('admin/wards')}}">
+                    <i class="entypo-users"></i>
+                    <span class="title">Guardians </span>
+                </a>
+            </li>
+            <li @if(Request::segment(2) == "bills") class="active" @endif>
+                <a href="{{url('admin/bills')}}">
                     <i class="entypo-briefcase"></i>
-                    <span class="title">Manage Orders </span>
+                    <span class="title">Bills </span>
+                </a>
+            </li>
+            <li @if(Request::segment(2) == "transactions") class="active" @endif>
+                <a href="{{url('admin/transactions')}}">
+                    <i class="entypo-credit-card"></i>
+                    <span class="title">Transactions </span>
                 </a>
             </li>
             <li @if(Request::segment(2) == "admins") class="active" @endif>
@@ -68,18 +80,7 @@
                     <span class="title">Manage Users </span>
                 </a>
             </li>
-            <li @if(Request::segment(2) == "customers") class="active" @endif>
-                <a href="{{url('admin/customers')}}">
-                    <i class="entypo-users"></i>
-                    <span class="title">Customers </span>
-                </a>
-            </li>
-            <li @if(Request::segment(2) == "reports") class="active" @endif>
-                <a href="{{url('admin/reports')}}">
-                    <i class="entypo-chart-pie"></i>
-                    <span class="title">Reports </span>
-                </a>
-            </li>
+            
         </ul>
         
     </div>

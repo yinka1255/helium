@@ -6,6 +6,8 @@ use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Session;
+use App\Admin;
+use App\Ward;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -22,34 +24,29 @@ class LoginsController extends Controller
     public function authenticate(Request $request){
     	$email = $request->input('email');
         $password = $request->input('password');
-    	if (Auth::attempt(['email' => $email, 'password' => $password])){
-            $user = Auth::user();
-            /*
-            if($user->status == 0){
-                Session::flash('error', 'Sorry! Kindly check your email to activate your account');
-                return back();
-            }   
-            */
-            if($user->status == 2){
+    	if (Auth::guard('admin')->attempt(['email' => $email, 'password' => $password])){
+            $admin_id = Auth::guard('admin')->id();
+            $admin = Admin::where("id", $admin_id)->first();
+            if($admin->status == 2){
                 Session::flash('error', 'Sorry! Your account has been deactivated');
                 return back();
             }   
-            if($user->type == 1){
-                return redirect('admin/index');
-            }    
-
-            if($user->type == 2){
-                return redirect('vendor/index');
-            }    
-
-            if($user->type == 3){
-                return back();
-            }    
+            return redirect('admin/index');
+            
         }else{		
                 Session::flash('error', 'Authentication failed. Kindly try again with valid details');
                 return back();
         }
 
+    }
+
+    public function mobileLogin(Request $request){
+        $guardian = Ward::where("phone", $request->input("phone"))->first();
+        if($guardian == null){
+            return response()->json(['error' => "The provided phone number does not exist on this platform"]);
+        }else{
+            return response()->json(['success' => $guardian]);
+        }
     }
 
     public function logout(){

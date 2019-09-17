@@ -8,7 +8,7 @@
 	<meta name="description" content="Neon Admin Panel" />
 	<meta name="author" content="" />
 
-	<title>Neon - Admin Panel| Products</title>
+	<title>Neon - Admin Panel| Session</title>
 	@include('admin.includes.head')
 
 </head>
@@ -21,45 +21,44 @@
 		<hr />
 		
 		<div class="row">
-			<div class="col-xs-12">
-				<div class="col-xs-8">
-					<ol class="breadcrumb bc-3">
-						<li>
-							<a href="{{url('admin/index')}}"><i class="fa-home"></i>Dashboard</a>
-						</li>
-						<li class="active">
-							<a href="#">Products</a>
-						</li>
-					</ol>
-				</div>
-				<div class="col-xs-4">
-					<div class="pull-right">
-							<a href="{{url('admin/new_product')}}" class="btn btn-primary"><i class="entypo-user"> </i> Add new</a>
+			<div class="col-xs-10">
+				<div class="row">
+					<div class="col-xs-8">
+						<ol class="breadcrumb bc-3">
+							<li>
+								<a href="{{url('admin/index')}}"><i class="fa-home"></i>Dashboard</a>
+							</li>
+							<li class="active">
+								<a href="#">Sessions</a>
+							</li>
+						</ol>
+					</div>
+					<div class="col-xs-4">
+						<div class="pull-right">
+							<a href="{{url('admin/new_session')}}" class="btn btn-primary"><i class="entypo-book"> </i> Add new</a>
+						</div>
 					</div>
 				</div>
+				<h3>Sessions</h3>
 				<table class="table table-bordered datatable" id="table-1">
 					<thead>
 						<tr>
 							<th>S/N</th>
-							<th></th>
-							<th>Name</th>
-							<th>Category</th>
+							<th width="70%">Name</th>
 							<th>Action</th>
 						</tr>
 					</thead>
 					<tbody>
-						@foreach($products as $key=>$product)
+						@foreach($sessions as $key=>$session)
 						<tr class="odd gradeX">
 							<td>{{$key + 1}}</td>
-							<td><img width="50px" src="{{asset('public/images/products/'.$product->image)}}"></td>
-							<td>{{$product->name}}</td>
-							<td>{{$product->category_name}}</td>
+							<td>{{$session->name}}</td>
 							<td>
-								<a href="{{url('admin/edit_product/'.$product->id)}}" class="btn btn-default btn-sm btn-icon icon-left">
+								<a href="{{url('admin/edit_session/'.$session->id)}}" class="btn btn-primary btn-sm btn-icon icon-left">
 									<i class="entypo-pencil"></i>
 									Edit
 								</a>
-								<a href="{{url('admin/delete_product/'.$product->id)}}" class="btn btn-danger btn-sm btn-icon icon-left">
+								<a href="{{url('admin/delete_session/'.$session->id)}}" class="btn btn-danger btn-sm btn-icon icon-left">
 									<i class="entypo-cancel"></i>
 									Delete
 								</a>
